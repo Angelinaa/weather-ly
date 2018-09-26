@@ -118,6 +118,7 @@
                 android:textColor="@android:color/white"
                 android:textSize="15sp"
                 />
+
             <!-- PM2.5布局  -->
             <LinearLayout
                 android:id="@+id/pm2_5_information"
@@ -131,18 +132,18 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:gravity="center"
                     android:orientation="horizontal"
-                    android:paddingBottom="6dp"
-                    android:paddingTop="6dp"
-                    android:paddingLeft="12dp"
-                    android:paddingRight="12dp"
-                    >
+                    android:paddingBottom="6.0dip"
+                    android:paddingLeft="12.0dip"
+                    android:paddingRight="12.0dip"
+                    android:paddingTop="6.0dip">
                     <!-- PM2.5文字布局  -->
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        >
+                        android:orientation="vertical">
+
                         <TextView
                             android:id="@+id/pm2_5"
                             android:layout_width="wrap_content"
@@ -150,8 +151,8 @@
                             android:singleLine="true"
                             android:text="PM2.5"
                             android:textColor="@android:color/white"
-                            android:textSize="12sp"
-                            />
+                            android:textSize="12sp" />
+
                         <TextView
                             android:id="@+id/pm2_5_num"
                             android:layout_width="wrap_content"
@@ -159,16 +160,16 @@
                             android:singleLine="true"
                             android:text="220"
                             android:textColor="@android:color/white"
-                            android:textSize="30sp"/>
+                            android:textSize="30sp" />
                     </LinearLayout>
                     <!-- pm2_5图片控件  -->
                     <ImageView
                         android:id="@+id/pm2_5_img"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="58dp"
+                        android:layout_height="match_parent"
                         android:layout_marginLeft="5dp"
-                        android:src="@drawable/biz_plugin_weather_0_50"
-                        />
+                        android:adjustViewBounds="false"
+                        android:src="@drawable/biz_plugin_weather_0_50" />
                 </LinearLayout>
                 <!-- 污染程度  -->
                 <TextView
@@ -190,13 +191,16 @@
                 android:layout_alignParentLeft="true"
                 android:layout_below="@id/humidity"
                 android:layout_centerInParent="true"
-                android:layout_marginTop="5dp">
+                android:layout_marginTop="10dp">
+
                 <ImageView
                     android:id="@+id/weather_img"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="159dp"
+                    android:layout_height="120dp"
                     android:layout_alignParentLeft="true"
-                    android:src="@drawable/biz_plugin_weather_qing"/>
+
+                    android:layout_marginLeft="1dp"
+                    android:src="@drawable/biz_plugin_weather_qing" />
                 <TextView
                     android:id="@+id/week_today"
                     android:layout_width="wrap_content"
