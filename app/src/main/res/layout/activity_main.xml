@@ -165,10 +165,9 @@
                     <!-- pm2_5图片控件  -->
                     <ImageView
                         android:id="@+id/pm2_5_img"
-                        android:layout_width="58dp"
-                        android:layout_height="match_parent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_marginLeft="5dp"
-                        android:adjustViewBounds="false"
                         android:src="@drawable/biz_plugin_weather_0_50" />
                 </LinearLayout>
                 <!-- 污染程度  -->
@@ -195,11 +194,9 @@
 
                 <ImageView
                     android:id="@+id/weather_img"
-                    android:layout_width="159dp"
-                    android:layout_height="120dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
-
-                    android:layout_marginLeft="1dp"
                     android:src="@drawable/biz_plugin_weather_qing" />
                 <TextView
                     android:id="@+id/week_today"
