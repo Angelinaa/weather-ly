@@ -1,32 +1,41 @@
 package com.example.weather;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import org.xmlpull.v1.*;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.HttpURLConnection;
-import java.net.*;
-import java.io.*;
-import cn.edu.pku.ly.util.NetUtil;
+import java.net.URL;
+
 import cn.edu.pku.ly.bean.TodayWeather;
+import cn.edu.pku.ly.util.NetUtil;
+
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
     private static final int UPDATE_TODAY_WEATHER=1;
     private ImageView mUpdateBtn;
+    private ImageView mCitySelect;
     private TextView cityTv,timeTv,humidityTv,weekTv,pmDataTv,pmQualityTv,temperatureTv,climateTv,windTv,city_name_Tv;
     private ImageView weatherImg,pmImg;
     private Handler mHandler = new Handler() {
-        public void handleMessage(android.os.Message msg) {
+        public void handleMessage(Message msg) {
             switch (msg.what) {
                 case UPDATE_TODAY_WEATHER:
                     updateTodayWeather((TodayWeather) msg.obj);
@@ -54,6 +63,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.d("myWeather","网络挂了");
             Toast.makeText(MainActivity.this,"网络挂了",Toast.LENGTH_LONG).show();
         }
+        mCitySelect=(ImageView)findViewById(R.id.title_city_manager);
+        mCitySelect.setOnClickListener(this);
         initView();
     }
     void initView(){
@@ -81,6 +92,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         windTv.setText("N/A");
     }
     public void onClick(View view){
+        if(view.getId()==R.id.title_city_manager){
+            Intent i=new Intent(this,SelectCity.class);
+            startActivity(i);
+        }
+        if(view.getId()==R.id.title_city_manager){
+            Intent i=new Intent(this,SelectCity.class);
+            startActivityForResult(i,1);
+        }
         if(view.getId()==R.id.title_update_btn){
             SharedPreferences sharedPreferences=getSharedPreferences("config",MODE_PRIVATE);
             String cityCode=sharedPreferences.getString("main_city_code","101010100");
@@ -147,6 +166,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int highCount =0;
         int lowCount=0;
         int typeCount =0;
+
         try {
             XmlPullParserFactory fac = XmlPullParserFactory.newInstance();
             XmlPullParser xmlPullParser = fac.newPullParser();
@@ -179,6 +199,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             } else if (xmlPullParser.getName().equals("pm25")) {
                                 eventType = xmlPullParser.next();
                                 todayWeather.setPm25(xmlPullParser.getText());
+                                int pm25=Integer.parseInt(todayWeather.getPm25());
+                                if(pm25>=0&&pm25<=50){
+                                    pmImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_0_50));
+                                } else if(pm25>=51&&pm25<=100){
+                                    pmImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_51_100));
+                                }else if(pm25>=101&&pm25<=150){
+                                    pmImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_101_150));
+                                }else if(pm25>=151&&pm25<=200){
+                                    pmImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_151_200));
+                                } else if(pm25>=201&&pm25<=300){
+                                    pmImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_201_300));
+                                } else if(pm25>=301){
+                                    pmImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_greater_300));
+                                }
                             } else if (xmlPullParser.getName().equals("quality")) {
                                 eventType = xmlPullParser.next();
                                 todayWeather.setQuality(xmlPullParser.getText());
@@ -206,6 +240,48 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 eventType = xmlPullParser.next();
                                 todayWeather.setType(xmlPullParser.getText());
                                 typeCount++;
+                                String type=todayWeather.getType();
+                                if(type.equals("晴")){
+                                    weatherImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_qing));
+                                } else if(type.equals("暴雪")){
+                                    weatherImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_baoxue));
+                                }else if(type.equals("暴雨")){
+                                    weatherImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_baoyu));
+                                }else if(type.equals("大暴雨")){
+                                    weatherImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_dabaoyu));
+                                } else if(type.equals("大雪")){
+                                    weatherImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_daxue));
+                                } else if(type.equals("大雨")){
+                                    weatherImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_dayu));
+                                }else if(type.equals("多云")){
+                                    weatherImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_duoyun));
+                                }else if(type.equals("雷阵雨")){
+                                    weatherImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_leizhenyu));
+                                }else if(type.equals("雷阵雨冰雹")){
+                                    weatherImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_leizhenyubingbao));
+                                }else if(type.equals("沙尘暴")){
+                                    weatherImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_shachenbao));
+                                }else if(type.equals("特大暴雨")){
+                                    weatherImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_tedabaoyu));
+                                }else if(type.equals("小雪")){
+                                    weatherImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_xiaoxue));
+                                }else if(type.equals("小雨")){
+                                    weatherImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_xiaoyu));
+                                }else if(type.equals("阴")){
+                                    weatherImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_yin));
+                                }else if(type.equals("雨夹雪")){
+                                    weatherImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_yujiaxue));
+                                }else if(type.equals("阵雪")){
+                                    weatherImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_zhenxue));
+                                }else if(type.equals("阵雨")){
+                                    weatherImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_zhenyu));
+                                }else if(type.equals("中雪")){
+                                    weatherImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_zhongxue));
+                                }else if(type.equals("中雨")){
+                                    weatherImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_zhongyu));
+                                }else
+                                    weatherImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_wu));
+
                         }
                 }
                     break;
@@ -235,5 +311,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         climateTv.setText(todayWeather.getType());
         windTv.setText("风力:"+todayWeather.getFengli());
         Toast.makeText(MainActivity.this,"更新成功！",Toast.LENGTH_SHORT).show();
+    }
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            String newCityCode= data.getStringExtra("cityCode");
+            Log.d("myWeather", "选择的城市代码为"+newCityCode);
+            if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
+                Log.d("myWeather", "网络OK");
+                queryWeatherCode(newCityCode);
+            } else {
+                Log.d("myWeather", "网络挂了");
+                Toast.makeText(MainActivity.this, "网络挂了！", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 }
