@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <RelativeLayout
+        android:id="@+id/title_top"
         android:layout_width="fill_parent"
         android:layout_height="45.0dip"
         android:background="#ffcd2626" >
@@ -30,5 +31,32 @@
             android:layout_toRightOf="@id/title_back"
             android:background="#A71717"
             android:gravity="center" />
+    </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/title_top">
+        <com.example.weather.ClearEditText
+            android:id="@+id/search_city"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:hint="搜索全国城市（中文）"
+            android:drawableLeft="@drawable/magnifying_glass"
+            android:drawablePadding="6dp"
+            android:background="@drawable/contact_search_box_edittext_keyword_background"
+            android:textColor="#ff000000"
+            android:textColorHint="#ffcccccc"
+            android:textSize="15dp"
+            />
+        <ListView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/search_city"
+            android:id="@+id/title_list"
+            android:background="#ffffff">
+
+        </ListView>
+
     </RelativeLayout>
 </RelativeLayout>
