@@ -92,10 +92,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         windTv.setText("N/A");
     }
     public void onClick(View view){
-        if(view.getId()==R.id.title_city_manager){
-            Intent i=new Intent(this,SelectCity.class);
-            startActivity(i);
-        }
+
         if(view.getId()==R.id.title_city_manager){
             Intent i=new Intent(this,SelectCity.class);
             startActivityForResult(i,1);
@@ -312,6 +309,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         windTv.setText("风力:"+todayWeather.getFengli());
         Toast.makeText(MainActivity.this,"更新成功！",Toast.LENGTH_SHORT).show();
     }
+
+
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1 && resultCode == RESULT_OK) {
             String newCityCode= data.getStringExtra("cityCode");
