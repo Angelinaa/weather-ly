@@ -107,7 +107,7 @@ public class SelectCity extends Activity implements View.OnClickListener{
         switch(v.getId()){
             case R.id.title_back:
                 Intent i=new Intent();
-                i.putExtra("cityCode","101160101");
+                //i.putExtra("cityCode","101010110");
                 setResult(RESULT_OK,i);
                 finish();
                 break;
