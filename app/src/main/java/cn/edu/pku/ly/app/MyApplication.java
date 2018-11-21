@@ -51,7 +51,7 @@ public class MyApplication extends Application{
     public List<City> getCityList() {
         return mCityList;
     }
-    public static MyApplication geiInstance(){
+    public static MyApplication getInstance(){
         return mApplication;
     }
     private CityDB openCityDB() {

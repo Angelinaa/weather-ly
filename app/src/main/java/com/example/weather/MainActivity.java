@@ -6,22 +6,16 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.weather.SelectCity;
-import com.example.weather.ViewPagerAdapter;
+import com.baidu.location.LocationClient;
+import com.baidu.location.LocationClientOption;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -48,6 +42,9 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
     //private ProgressBar mUpdateProgressBar;
     private TextView cityTv,timeTv,humidityTv,weekTv,pmDataTv,pmQualityTv,temperatureTv,climateTv,windTv,city_name_Tv;
     private ImageView weatherImg,pmImg;
+    public LocationClient mLocationClient = null;
+    private MyLocationListener myListener = new MyLocationListener();
+    private ImageView mLocation;
     //六天天⽓气信息展示
     //显示两个展示⻚页
     private ViewPagerAdapter vpAdapter;
@@ -61,6 +58,8 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
             ,week_today2,temperature2,climate2,wind2;
     private TextView
             week_today3,temperature3,climate3,wind3,week_today4,temperature4,climate4,wind4,week_today5,temperature5,climate5,wind5;
+
+
     private Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -81,8 +80,22 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         mUpdateBtn=(ImageView)findViewById(R.id.title_update_btn);
         mUpdateBtn.setOnClickListener(this);
 
+        mLocation=(ImageView)findViewById(R.id.title_location);
+        mLocation.setOnClickListener(this);
+
+        mLocationClient = new LocationClient(getApplicationContext());
+        //声明LocationClient类
+        mLocationClient.registerLocationListener(myListener);
+        //注册监听函数
+        initLocation();
+
         //mUpdateProgressBar=(ProgressBar)findViewById(R.id.title_update_progress);
         //mUpdateProgressBar.setOnClickListener(this);
+
+        mLocationClient = new LocationClient(getApplicationContext());
+        myListener = new MyLocationListener();
+        //注册监听函数
+        mLocationClient.registerLocationListener(myListener);
 
         if(NetUtil.getNetworkState(this)!=NetUtil.NETWORN_NONE){
             Log.d("myWeather","网络OK");
@@ -181,7 +194,57 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
                 Toast.makeText(MainActivity.this,"网络挂了",Toast.LENGTH_LONG).show();
             }
         }
+        if(view.getId()==R.id.title_location){
+//            setUpdateProgress();
+
+            if(mLocationClient.isStarted()){
+                mLocationClient.stop();
+            }
+            mLocationClient.start();
+
+
+            final Handler BDHandler=new Handler(){
+                public void handleMessage(Message msg){
+                    switch (msg.what){
+                        case 10:
+                            Log.d("case10","case10");
+                            if(msg.obj!=null){
+                                if(NetUtil.getNetworkState(MainActivity.this)!=NetUtil.NETWORN_NONE){
+                                    Log.d("myweather","网络ok");
+                                    queryWeatherCode(myListener.cityCode);
+                                }else{
+                                    Log.d("myweather","网络挂了");
+                                    Toast.makeText(MainActivity.this,"网络挂了！",Toast.LENGTH_LONG).show();
+                                }
+                            }
+                            myListener.cityCode=null;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            };
+            new Thread(() -> {
+                Log.i("thread city code", "enter ");
+                try{
+                    Message msg=new Message();
+                    msg.what=10;
+                    while(myListener.cityCode==null){
+                        //Thread.sleep(2000);
+                        Log.i("thread city code", "null ");
+                    }
+                    msg.obj=myListener.cityCode;
+                    Log.i("thread city code", myListener.cityCode);
+                    BDHandler.sendMessage(msg);
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+            }).start();
+        }
     }
+
+
+
     private void queryWeatherCode(String cityCode){
 
         final String address="http://wthrcdn.etouch.cn/WeatherApi?citykey="+cityCode;
@@ -202,14 +265,10 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
                     String str;
                     while ((str = reader.readLine()) != null) {
                         response.append(str);
-                        Log.d("myWeather", str);
                     }
                     String responseStr = response.toString();
-                    Log.d("myWeatherXMLString", responseStr);
                     todayWeather=parseXML(responseStr);
                     if(todayWeather!=null){
-                        Log.d("myWeather",todayWeather.toString());
-
                         Message msg =new Message();
                         msg.what = UPDATE_TODAY_WEATHER;
                         msg.obj=todayWeather;
@@ -240,7 +299,7 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
             XmlPullParser xmlPullParser = fac.newPullParser();
             xmlPullParser.setInput(new StringReader(xmldata));
             int eventType = xmlPullParser.getEventType();
-            Log.d("myWeather", "parseXML");
+
             while (eventType != XmlPullParser.END_DOCUMENT) {
                 switch (eventType) {
                     // 判断当前事件是否为文档开始事件
@@ -490,12 +549,9 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
 
 
     }
-
-
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1 && resultCode == RESULT_OK) {
             String newCityCode= data.getStringExtra("cityCode");
-            Log.d("myWeather", "选择的城市代码为"+newCityCode);
             if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
                 Log.d("myWeather", "网络OK");
                 queryWeatherCode(newCityCode);
@@ -505,7 +561,8 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
             }
         }
     }
-    //初始化校⼩小圆点
+
+    //初始化小圆点
     void initDots(){
         dots = new ImageView[views.size()];
         for(int i =0;i<views.size();i++){
@@ -539,6 +596,52 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
     }
     @Override
     public void onPageScrollStateChanged(int state) {
+    }
+
+    private void initLocation(){
+        LocationClientOption option = new LocationClientOption();
+        option.setIsNeedAddress(true);
+
+        option.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);
+        //可选，设置定位模式，默认高精度
+        //LocationMode.Hight_Accuracy：高精度；
+        //LocationMode. Battery_Saving：低功耗；
+        //LocationMode. Device_Sensors：仅使用设备；
+
+        option.setCoorType("bd09ll");
+        //可选，设置返回经纬度坐标类型，默认GCJ02
+        //GCJ02：国测局坐标；
+        //BD09ll：百度经纬度坐标；
+        //BD09：百度墨卡托坐标；
+        //海外地区定位，无需设置坐标类型，统一返回WGS84类型坐标
+
+        option.setScanSpan(1000);
+        //可选，设置发起定位请求的间隔，int类型，单位ms
+        //如果设置为0，则代表单次定位，即仅定位一次，默认为0
+        //如果设置非0，需设置1000ms以上才有效
+
+        option.setOpenGps(true);
+        //可选，设置是否使用gps，默认false
+        //使用高精度和仅用设备两种定位模式的，参数必须设置为true
+
+        option.setLocationNotify(true);
+        //可选，设置是否当GPS有效时按照1S/1次频率输出GPS结果，默认false
+
+        option.setIgnoreKillProcess(false);
+        //可选，定位SDK内部是一个service，并放到了独立进程。
+        //设置是否在stop的时候杀死这个进程，默认（建议）不杀死，即setIgnoreKillProcess(true)
+
+        option.SetIgnoreCacheException(false);
+        //可选，设置是否收集Crash信息，默认收集，即参数为false
+
+        option.setWifiCacheTimeOut(5*60*1000);
+        //可选，V7.2版本新增能力
+        //如果设置了该接口，首次启动定位时，会先判断当前Wi-Fi是否超出有效期，若超出有效期，会先重新扫描Wi-Fi，然后定位
+
+        option.setEnableSimulateGps(false);
+        //可选，设置是否需要过滤GPS仿真结果，默认需要，即参数为false
+
+        mLocationClient.setLocOption(option);
     }
 }
 
